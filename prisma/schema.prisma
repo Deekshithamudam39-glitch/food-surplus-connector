@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String       @id @default(cuid())
+  email            String       @unique
+  passwordHash     String
+  name             String
+  role             String       // "DONOR" | "RECEIVER" | "ADMIN"
+  status           String       @default("APPROVED") // "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED"
+  phone            String?
+  organizationName String?
+  organizationType String?      // "RESTAURANT" | "HOSTEL" | "FUNCTION_HALL" | "NGO" | "VOLUNTEER" | "OTHER"
+  documentUrl      String?      // Verification proof or NGO registration
+  address          String?
+  city             String?
+  state            String?
+  pincode          String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  donations        Donation[]
+  claims           Claim[]
+  reports          Report[]     @relation("UserReports")
+
+  @@index([role, status])
+  @@index([email])
+}
+
+model Donation {
+  id              String        @id @default(cuid())
+  donorId         String
+  donor           User          @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  category        String        // "COOKED_MEALS" | "RAW_INGREDIENTS" | "PACKAGED_FOOD" | "BAKERY" | "PRODUCE" | "OTHER"
+  quantity        Int           // e.g. 50
+  quantityUnit    String        @default("servings") // "servings" | "kg" | "boxes" | "meals"
+  preparationTime DateTime?
+  pickupDeadline  DateTime
+  foodCondition   String        // "FRESH_HOT" | "CHILLED" | "PACKAGED_SEALED" | "SHELF_STABLE"
+  address         String        // EXACT address - confidential
+  area            String        // PUBLIC area / neighborhood
+  city            String
+  state           String
+  pincode         String
+  imageUrl        String?
+  status          String        @default("AVAILABLE") // "AVAILABLE" | "CLAIMED" | "COMPLETED" | "EXPIRED" | "CANCELLED"
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  claims          Claim[]
+  reports         Report[]
+
+  @@index([status, pickupDeadline])
+  @@index([category])
+  @@index([donorId])
+  @@index([city])
+}
+
+model Claim {
+  id                 String       @id @default(cuid())
+  donationId         String
+  donation           Donation     @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  receiverId         String
+  receiver           User         @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  status             String       @default("PENDING_PICKUP") // "PENDING_PICKUP" | "COMPLETED" | "EXPIRED" | "CANCELLED"
+  pickupOtp          String       // 6-digit verification code
+  expiresAt          DateTime     // 30 minutes after creation
+  pickedUpAt         DateTime?
+  cancellationReason String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  reports            Report[]
+
+  @@index([donationId, status])
+  @@index([receiverId])
+  @@index([expiresAt])
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  reporterId  String
+  reporter    User      @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  donationId  String?
+  donation    Donation? @relation(fields: [donationId], references: [id], onDelete: SetNull)
+  claimId     String?
+  claim       Claim?    @relation(fields: [claimId], references: [id], onDelete: SetNull)
+  reason      String
+  details     String
+  status      String    @default("PENDING") // "PENDING" | "RESOLVED" | "DISMISSED"
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status])
+  @@index([reporterId])
+}
