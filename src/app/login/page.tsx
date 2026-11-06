@@ -91,29 +91,29 @@ function LoginForm() {
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('taj.hotel@donor.com', 'Password@123')}
+            onClick={() => setDemoCredentials('demo.hotel@donor.com', 'Password@123')}
             className="p-2 text-left bg-white border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors"
           >
             <span className="font-bold text-blue-700 block">🏨 Donor (Hotel)</span>
-            <span className="text-slate-500 text-[10px]">taj.hotel@donor.com</span>
+            <span className="text-slate-500 text-[10px]">demo.hotel@donor.com</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('robinhood@ngo.com', 'Password@123')}
+            onClick={() => setDemoCredentials('demo.ngo1@ngo.com', 'Password@123')}
             className="p-2 text-left bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 transition-colors"
           >
             <span className="font-bold text-emerald-700 block">🤝 Verified NGO</span>
-            <span className="text-slate-500 text-[10px]">robinhood@ngo.com</span>
+            <span className="text-slate-500 text-[10px]">demo.ngo1@ngo.com</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('volunteer.arun@ngo.com', 'Password@123')}
+            onClick={() => setDemoCredentials('demo.volunteer@ngo.com', 'Password@123')}
             className="p-2 text-left bg-white border border-amber-200 rounded-xl hover:bg-amber-50 transition-colors"
           >
             <span className="font-bold text-amber-700 block">⏳ Pending Receiver</span>
-            <span className="text-slate-500 text-[10px]">volunteer.arun@ngo.com</span>
+            <span className="text-slate-500 text-[10px]">demo.volunteer@ngo.com</span>
           </button>
         </div>
       </div>

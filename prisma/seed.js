@@ -3,10 +3,12 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Starting database seed...');
+const HOUR = 60 * 60 * 1000;
 
-  // Clean existing data
+async function main() {
+  console.log('Starting database seed...');
+
+  // Clean existing data (child tables first)
   await prisma.report.deleteMany({});
   await prisma.claim.deleteMany({});
   await prisma.donation.deleteMany({});
@@ -15,36 +17,36 @@ async function main() {
   const defaultPassword = await bcrypt.hash('Password@123', 10);
   const adminPassword = await bcrypt.hash('Admin@123', 10);
 
-  // 1. Seed Admin
-  const admin = await prisma.user.create({
+  // 1. Admin
+  await prisma.user.create({
     data: {
       email: 'admin@foodsurplus.org',
       passwordHash: adminPassword,
-      name: 'System Administrator',
+      name: 'Demo Admin',
       role: 'ADMIN',
       status: 'APPROVED',
-      phone: '+91 98765 00001',
+      phone: '+91 90000 00001',
       organizationName: 'Food Surplus Connector HQ',
       organizationType: 'OTHER',
-      address: 'Suite 400, Tech Park Road',
+      address: 'Demo Building 1, Main Road',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560001',
     },
   });
 
-  // 2. Seed Donors
+  // 2. Donors
   const donor1 = await prisma.user.create({
     data: {
-      email: 'taj.hotel@donor.com',
+      email: 'demo.hotel@donor.com',
       passwordHash: defaultPassword,
-      name: 'Chef Rajesh Sharma',
+      name: 'Demo Donor One',
       role: 'DONOR',
       status: 'APPROVED',
-      phone: '+91 98765 11111',
-      organizationName: 'The Grand Palace Hotel & Banquet',
+      phone: '+91 90000 00011',
+      organizationName: 'Demo Hotel & Banquet',
       organizationType: 'FUNCTION_HALL',
-      address: 'Plot 42, Residency Road, Shanthala Nagar',
+      address: 'Demo Building 2, Residency Road',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560025',
@@ -53,15 +55,15 @@ async function main() {
 
   const donor2 = await prisma.user.create({
     data: {
-      email: 'spicybites@donor.com',
+      email: 'demo.restaurant@donor.com',
       passwordHash: defaultPassword,
-      name: 'Ananya Deshmukh',
+      name: 'Demo Donor Two',
       role: 'DONOR',
       status: 'APPROVED',
-      phone: '+91 98765 22222',
-      organizationName: 'Spicy Bites Restaurant & Catering',
+      phone: '+91 90000 00012',
+      organizationName: 'Demo Restaurant & Catering',
       organizationType: 'RESTAURANT',
-      address: '14th Cross, 100ft Road, Indiranagar',
+      address: 'Demo Building 3, 100ft Road',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560038',
@@ -70,194 +72,188 @@ async function main() {
 
   const donor3 = await prisma.user.create({
     data: {
-      email: 'cityhostel@donor.com',
+      email: 'demo.hostel@donor.com',
       passwordHash: defaultPassword,
-      name: 'Ramesh Verma',
+      name: 'Demo Donor Three',
       role: 'DONOR',
       status: 'APPROVED',
-      phone: '+91 98765 33333',
-      organizationName: 'St. Jude University Hostel Mess',
+      phone: '+91 90000 00013',
+      organizationName: 'Demo University Hostel Mess',
       organizationType: 'HOSTEL',
-      address: 'Campus Gate 3, Electronic City Phase 1',
+      address: 'Demo Campus Gate 3, Electronic City',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560100',
     },
   });
 
-  // 3. Seed Receivers (NGOs / Volunteers)
-  const receiverApproved1 = await prisma.user.create({
+  // 3. Receivers (NGOs / Volunteers)
+  const receiver1 = await prisma.user.create({
     data: {
-      email: 'robinhood@ngo.com',
+      email: 'demo.ngo1@ngo.com',
       passwordHash: defaultPassword,
-      name: 'Vikram Mehta',
+      name: 'Demo Receiver One',
       role: 'RECEIVER',
       status: 'APPROVED',
-      phone: '+91 98765 44441',
-      organizationName: 'Robin Hood Food Rescue Army',
+      phone: '+91 90000 00021',
+      organizationName: 'Demo Helping Hands NGO',
       organizationType: 'NGO',
-      documentUrl: 'https://example.com/docs/robin-hood-ngo-registration.pdf',
-      address: 'Building 12, Koramangala 4th Block',
+      documentUrl: 'https://example.com/docs/demo-ngo-1.pdf',
+      address: 'Demo Building 4, Koramangala',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560034',
     },
   });
 
-  const receiverApproved2 = await prisma.user.create({
+  await prisma.user.create({
     data: {
-      email: 'hopecharity@ngo.com',
+      email: 'demo.ngo2@ngo.com',
       passwordHash: defaultPassword,
-      name: 'Priya Sundaram',
+      name: 'Demo Receiver Two',
       role: 'RECEIVER',
       status: 'APPROVED',
-      phone: '+91 98765 44442',
-      organizationName: 'Hope Community Shelter & Kitchen',
+      phone: '+91 90000 00022',
+      organizationName: 'Demo Hope Kitchen NGO',
       organizationType: 'NGO',
-      documentUrl: 'https://example.com/docs/hope-shelter-charity-80g.pdf',
-      address: '7th Main, BTM 2nd Stage',
+      documentUrl: 'https://example.com/docs/demo-ngo-2.pdf',
+      address: 'Demo Building 5, BTM 2nd Stage',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560076',
     },
   });
 
-  // Receiver with PENDING status to test Admin Verification feature
-  const receiverPending = await prisma.user.create({
+  // Receiver with PENDING status, to test the admin approval feature
+  await prisma.user.create({
     data: {
-      email: 'volunteer.arun@ngo.com',
+      email: 'demo.volunteer@ngo.com',
       passwordHash: defaultPassword,
-      name: 'Arun Kumar',
+      name: 'Demo Receiver Three',
       role: 'RECEIVER',
       status: 'PENDING',
-      phone: '+91 98765 55555',
-      organizationName: 'Seva Youth Volunteer Corps',
+      phone: '+91 90000 00023',
+      organizationName: 'Demo Youth Volunteers',
       organizationType: 'VOLUNTEER',
-      documentUrl: 'https://example.com/docs/arun-volunteer-id.pdf',
-      address: '4th Cross, Malleshwaram',
+      documentUrl: 'https://example.com/docs/demo-volunteer.pdf',
+      address: 'Demo Building 6, Malleshwaram',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560003',
     },
   });
 
-  // 4. Seed Surplus Food Donations
+  // 4. Donations
   const now = new Date();
+  const cookedImage =
+    'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80';
 
-  // Donation 1: AVAILABLE Cooked Meals from Grand Palace Hotel
-  const deadline1 = new Date(now.getTime() + 4 * 60 * 60 * 1000); // 4 hours from now
-  const prepTime1 = new Date(now.getTime() - 1 * 60 * 60 * 1000); // 1 hour ago
+  // Donation 1: cooked meals, available
   await prisma.donation.create({
     data: {
       donorId: donor1.id,
       title: 'Buffet Surplus: Paneer Butter Masala, Jeera Rice & Naan',
       description:
-        'Freshly cooked premium buffet banquet surplus. Packed in food-grade insulated containers, untouched and hygienically sealed.',
+        'Freshly cooked buffet surplus. Packed in clean food-grade containers, untouched and sealed.',
       category: 'COOKED_MEALS',
       quantity: 75,
       quantityUnit: 'servings',
-      preparationTime: prepTime1,
-      pickupDeadline: deadline1,
+      preparationTime: new Date(now.getTime() - 1 * HOUR),
+      pickupDeadline: new Date(now.getTime() + 4 * HOUR),
       foodCondition: 'FRESH_HOT',
-      address: 'The Grand Palace Hotel, Service Gate 2, Plot 42, Residency Road',
-      area: 'Residency Road / Shanthala Nagar',
-      city: 'Bangalore',
-      state: 'Karnataka',
-      pincode: '560025',
-      imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80',
-      status: 'AVAILABLE',
-    },
-  });
-
-  // Donation 2: AVAILABLE Bakery & Breads
-  const deadline2 = new Date(now.getTime() + 6 * 60 * 60 * 1000);
-  await prisma.donation.create({
-    data: {
-      donorId: donor2.id,
-      title: 'Artisan Sourdough Loaves, Croissants & Muffin Boxes',
-      description:
-        'End-of-day fresh bakes from our afternoon cycle. Ideal for evening distribution to children shelters.',
-      category: 'BAKERY',
-      quantity: 40,
-      quantityUnit: 'boxes',
-      preparationTime: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-      pickupDeadline: deadline2,
-      foodCondition: 'SHELF_STABLE',
-      address: 'Spicy Bites Bakery Annex, 14th Cross, 100ft Road',
-      area: 'Indiranagar 100ft Road',
-      city: 'Bangalore',
-      state: 'Karnataka',
-      pincode: '560038',
-      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
-      status: 'AVAILABLE',
-    },
-  });
-
-  // Donation 3: AVAILABLE Raw Produce & Vegetables
-  const deadline3 = new Date(now.getTime() + 10 * 60 * 60 * 1000);
-  await prisma.donation.create({
-    data: {
-      donorId: donor1.id,
-      title: 'Crisp Farm Bell Peppers, Tomatoes, Potatoes & Onions',
-      description:
-        'High quality grade-A vegetables from kitchen banquet prep surplus. Uncut, fresh, dry crates.',
-      category: 'PRODUCE',
-      quantity: 60,
-      quantityUnit: 'kg',
-      pickupDeadline: deadline3,
-      foodCondition: 'CHILLED',
-      address: 'The Grand Palace Kitchen Loading Bay, Plot 42, Residency Road',
+      address: 'Demo Hotel & Banquet, Service Gate 2, Residency Road',
       area: 'Residency Road',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560025',
-      imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
+      imageUrl: cookedImage,
       status: 'AVAILABLE',
     },
   });
 
-  // Donation 4: AVAILABLE Student Mess Cooked Meals
-  const deadline4 = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  // Donation 2: produce, available
   await prisma.donation.create({
     data: {
-      donorId: donor3.id,
-      title: 'Steamed Basmati Rice, Mixed Vegetable Sambar & Curd',
+      donorId: donor1.id,
+      title: 'Fresh Vegetables: Bell Peppers, Tomatoes & Potatoes',
       description:
-        'Clean, nutritious hostel mess surplus stored in large warm steel cans. Easily serves 60+ individuals.',
-      category: 'COOKED_MEALS',
-      quantity: 65,
-      quantityUnit: 'servings',
-      preparationTime: new Date(now.getTime() - 45 * 60 * 1000),
-      pickupDeadline: deadline4,
-      foodCondition: 'FRESH_HOT',
-      address: 'St. Jude University Campus Mess, Dining Hall C, Gate 3',
-      area: 'Electronic City Phase 1',
+        'Good quality vegetables from kitchen prep surplus. Uncut, fresh, packed in dry crates.',
+      category: 'PRODUCE',
+      quantity: 60,
+      quantityUnit: 'kg',
+      preparationTime: new Date(now.getTime() - 2 * HOUR),
+      pickupDeadline: new Date(now.getTime() + 10 * HOUR),
+      foodCondition: 'CHILLED',
+      address: 'Demo Hotel & Banquet, Kitchen Loading Bay, Residency Road',
+      area: 'Residency Road',
       city: 'Bangalore',
       state: 'Karnataka',
-      pincode: '560100',
-      imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
+      pincode: '560025',
       status: 'AVAILABLE',
     },
   });
 
-  // Donation 5: COMPLETED Donation with verified Claim & OTP (counts towards verified meals saved statistics)
-  const completedDonation = await prisma.donation.create({
+  // Donation 3: bakery, available
+  await prisma.donation.create({
     data: {
       donorId: donor2.id,
-      title: 'Vegetable Biryani & Mirchi Ka Salan Handover',
-      description: 'Catering excess from corporate lunch conference.',
-      category: 'COOKED_MEALS',
-      quantity: 120,
-      quantityUnit: 'servings',
-      preparationTime: new Date(now.getTime() - 8 * 60 * 60 * 1000),
-      pickupDeadline: new Date(now.getTime() + 2 * 60 * 60 * 1000),
-      foodCondition: 'FRESH_HOT',
-      address: 'Spicy Bites Banquet Hall, 14th Cross, 100ft Road',
+      title: 'Bakery Surplus: Bread Loaves & Buns',
+      description: 'Fresh bread and buns baked today. Sealed packets, unsold at closing time.',
+      category: 'BAKERY',
+      quantity: 40,
+      quantityUnit: 'boxes',
+      preparationTime: new Date(now.getTime() - 3 * HOUR),
+      pickupDeadline: new Date(now.getTime() + 6 * HOUR),
+      foodCondition: 'PACKAGED_SEALED',
+      address: 'Demo Restaurant & Catering, Back Entrance, 100ft Road',
       area: 'Indiranagar',
       city: 'Bangalore',
       state: 'Karnataka',
       pincode: '560038',
-      imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+      status: 'AVAILABLE',
+    },
+  });
+
+  // Donation 4: hostel mess meals, available
+  await prisma.donation.create({
+    data: {
+      donorId: donor3.id,
+      title: 'Hostel Mess Surplus: Rice, Dal & Vegetable Curry',
+      description: 'Extra dinner prepared for the hostel. Cooked today and kept covered and hot.',
+      category: 'COOKED_MEALS',
+      quantity: 100,
+      quantityUnit: 'servings',
+      preparationTime: new Date(now.getTime() - 1 * HOUR),
+      pickupDeadline: new Date(now.getTime() + 3 * HOUR),
+      foodCondition: 'FRESH_HOT',
+      address: 'Demo University Hostel Mess, Campus Gate 3, Electronic City',
+      area: 'Electronic City Phase 1',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      pincode: '560100',
+      imageUrl: cookedImage,
+      status: 'AVAILABLE',
+    },
+  });
+
+  // Donation 5: already completed, with a completed claim (shows "meals saved")
+  const completedDonation = await prisma.donation.create({
+    data: {
+      donorId: donor2.id,
+      title: 'Catering Surplus: Veg Biryani & Raita',
+      description: 'Leftover biryani from a corporate event. Picked up by the NGO.',
+      category: 'COOKED_MEALS',
+      quantity: 120,
+      quantityUnit: 'servings',
+      preparationTime: new Date(now.getTime() - 8 * HOUR),
+      pickupDeadline: new Date(now.getTime() - 4 * HOUR),
+      foodCondition: 'FRESH_HOT',
+      address: 'Demo Restaurant & Catering, Back Entrance, 100ft Road',
+      area: 'Indiranagar',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      pincode: '560038',
+      imageUrl: cookedImage,
       status: 'COMPLETED',
     },
   });
@@ -265,25 +261,28 @@ async function main() {
   await prisma.claim.create({
     data: {
       donationId: completedDonation.id,
-      receiverId: receiverApproved1.id,
+      receiverId: receiver1.id,
       status: 'COMPLETED',
-      pickupOtp: '584920',
-      expiresAt: new Date(now.getTime() - 5 * 60 * 60 * 1000),
-      pickedUpAt: new Date(now.getTime() - 6 * 60 * 60 * 1000),
+      pickupOtp: '482913',
+      createdAt: new Date(now.getTime() - 6 * HOUR),
+      expiresAt: new Date(now.getTime() - 5.5 * HOUR),
+      pickedUpAt: new Date(now.getTime() - 5.75 * HOUR),
     },
   });
 
-  console.log('✅ Database seeded successfully:');
+  console.log('Database seeded successfully:');
   console.log('   Admin: admin@foodsurplus.org (Admin@123)');
-  console.log('   Donors: taj.hotel@donor.com, spicybites@donor.com, cityhostel@donor.com (Password@123)');
-  console.log('   Approved Receivers: robinhood@ngo.com, hopecharity@ngo.com (Password@123)');
-  console.log('   Pending Receiver: volunteer.arun@ngo.com (Password@123)');
-  console.log('   Seeded 5 realistic donations, 1 completed claim (120 confirmed meals saved).');
+  console.log(
+    '   Donors: demo.hotel@donor.com, demo.restaurant@donor.com, demo.hostel@donor.com (Password@123)'
+  );
+  console.log('   Approved Receivers: demo.ngo1@ngo.com, demo.ngo2@ngo.com (Password@123)');
+  console.log('   Pending Receiver: demo.volunteer@ngo.com (Password@123)');
+  console.log('   Seeded 5 donations, 1 completed claim (120 meals saved).');
 }
 
 main()
   .catch((e) => {
-    console.error('Seed error:', e);
+    console.error('Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {
